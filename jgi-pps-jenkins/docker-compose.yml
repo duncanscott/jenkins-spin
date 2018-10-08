@@ -1,0 +1,152 @@
+#
+# to use this template, substitute the following throughout:
+#
+# - for camunda: your stack name
+# - for PostgresUser: your Postgres user name
+# - for ProjectDir: your global file system project directory
+# - for UserID: your numeric user ID that should own the dump files
+# - for GroupID: your numeric group ID that should own the dump files
+
+version: '2'
+
+services:
+    db:
+        image: postgres:10-alpine
+
+        # uncomment only if access outside of Spin is needed
+        #ports:
+        #    - 5432:5432/tcp
+
+        stdin_open: true
+        tty: true
+
+        volumes:
+            - db.jgi-pps-camunda:/var/lib/postgresql/data
+
+        # substitute the account name to be used to access the database below
+        environment:
+            POSTGRES_USER: camunda
+            POSTGRES_PASSWORD_FILE: /run/secrets/camunda_postgres_password
+
+        cap_drop:
+            - ALL
+        cap_add:
+            - CHOWN
+            - DAC_OVERRIDE
+            - FOWNER
+            - SETGID
+            - SETUID
+
+        secrets:
+            - mode: '0444'
+              uid: '0'
+              gid: '0'
+              source: db.jgi-pps-camunda.camunda_postgres_password
+              target: camunda_postgres_password
+
+        # uncomment to set configuration options as needed
+        # (this is cleaner than creating your own image with a custom config file)
+        #command:
+        #    - postgres
+        #    - -c
+        #    - max_connections=100
+        #    - -c
+        #    - shared_buffers=32MB
+
+        labels:
+            io.rancher.container.pull_image: always
+
+    web:
+        image: adminer:4.6.3
+        restart: always
+        cap_drop:
+            - ALL
+        ports:
+          - 60003:8080
+        links:
+          - db
+    kv:
+        image: couchdb:2.2.0
+        restart: always
+        cap_drop:
+            - ALL
+        cap_add:
+            - CHOWN
+            - DAC_OVERRIDE
+            - FOWNER
+            - SETGID
+            - SETUID
+        ports:
+          - 60002:5984
+        volumes:
+          - kv.jgi-pps-camunda:/opt/couchdb/data
+          - kv.jgi-pps-camunda:/opt/couchdb/etc/local.d
+    app: #camunda is not an allowed service name. Allowed service names are: api,db,kv,lb,web,app
+        image: registry.spin.nersc.gov/scott/camunda-explore:spin-0.0.3
+        restart: always
+        cap_drop:
+            - ALL
+        secrets:
+            - mode: '0444'
+              uid: '0'
+              gid: '0'
+              source: db.jgi-pps-camunda.camunda_postgres_password
+              target: camunda_postgres_password
+        environment:
+           - DB_DRIVER=org.postgresql.Driver
+           - DB_URL=jdbc:postgresql://db:5432/process-engine
+           - DB_USERNAME=camunda
+           - WAIT_FOR=db:5432
+        ports:
+         - 60001:8080
+        links:
+         - db
+
+#    db-dump:
+#        image: registry.spin.nersc.gov/pub/postgres-pg_dump:10-alpine
+#
+#        stdin_open: true
+#        tty: true
+#
+#        volumes:
+#        - /global/project/projectdirs/ProjectDir/path/to/dump/:/pg_dump
+#
+#        # further customize filenames and retention below as needed
+#        environment:
+#            POSTGRES_HOST: db
+#            POSTGRES_USER: PostgresUser
+#            POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+#            POSTGRES_DUMP_DIR: /pg_dump
+#            POSTGRES_DUMP_FILE_BASE: db-dump.sql.gz
+#            POSTGRES_DUMP_RETAIN_DAYS: '7'
+#            TZ: US/Pacific
+#
+#        secrets:
+#            - mode: '0400'
+#              uid: 'UserID'
+#              gid: 'GroupID'
+#              source: db.jgi-pps-camunda.postgres_password
+#              target: postgres_password
+#
+#        user: UserID:GroupID
+#
+#        labels:
+#            io.rancher.container.start_once: 'true'
+#            io.rancher.container.pull_image: always
+#            cron.schedule: 0 0 11 * * *
+
+#
+# note: secrets and volumes must have been created manually
+#
+
+secrets:
+    db.jgi-pps-camunda.camunda_postgres_password:
+        external: true
+
+volumes:
+    db.jgi-pps-camunda:
+        driver: rancher-nfs
+        external: true
+    kv.jgi-pps-camunda:
+        driver: rancher-nfs
+        external: true
