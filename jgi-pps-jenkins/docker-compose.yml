@@ -14,16 +14,15 @@ services:
         image: registry.spin.nersc.gov/scott/jenkins:jenkins:2.138.1
         restart: always
         cap_drop:
-            - ALL
+         - ALL
         cap_add:
-            - CHOWN
-            - DAC_OVERRIDE
-            - FOWNER
-            - SETGID
-            - SETUID
+         - CHOWN
+         - DAC_OVERRIDE
+         - FOWNER
+         - SETGID
+         - SETUID
         ports:
-         - "68989:5242"
-        user: 5951:75137
+         - 60010:8080
 #volumes:
 #    app.jgi-pps-jenkins:
 #        driver: rancher-nfs
