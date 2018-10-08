@@ -22,7 +22,7 @@ services:
             - SETGID
             - SETUID
         ports:
-         - 68989:5242
+         - "68989:5242"
         user: 5951:75137
 #volumes:
 #    app.jgi-pps-jenkins:
