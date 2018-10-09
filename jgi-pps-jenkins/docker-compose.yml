@@ -11,7 +11,8 @@ version: '2'
 
 services:
     app: #camunda is not an allowed service name. Allowed service names are: api,db,kv,lb,web,app
-        image: debian:latest
+        image: jenkins/jenkins:lts
+        restart: always
         cap_drop:
          - ALL
         cap_add:
@@ -20,8 +21,10 @@ services:
          - FOWNER
          - SETGID
          - SETUID
-        stdin_open: true
-        tty: true
+#        user: 5951:5242
+        ports:
+         - 60010:8080
+         - 60011:50000
         volumes:
          - app.jgi-pps-jenkins:/var/jenkins_home
 volumes:
