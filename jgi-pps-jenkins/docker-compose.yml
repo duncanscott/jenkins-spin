@@ -11,11 +11,19 @@ version: '2'
 
 services:
     app: #camunda is not an allowed service name. Allowed service names are: api,db,kv,lb,web,app
-    image: debian
-    stdin_open: true
-    tty: true
-    volumes:
-    - app.jgi-pps-jenkins:/var/jenkins_home
+        image: debian:latest
+        cap_drop:
+         - ALL
+        cap_add:
+         - CHOWN
+         - DAC_OVERRIDE
+         - FOWNER
+         - SETGID
+         - SETUID
+        stdin_open: true
+        tty: true
+        volumes:
+         - app.jgi-pps-jenkins:/var/jenkins_home
 volumes:
     app.jgi-pps-jenkins:
         driver: rancher-nfs
