@@ -1,12 +1,11 @@
-# To get this to work on spin, launch the docker-compose.yml.init version first, and follow the instructions
-# to change permissions on /var/jenkins_home.
-
+# Use this docker compose to set up /var/jenkins_home.
+# You can then exec -it /bin/bash into the container and executre chmod 777 /var/jenkins_home.
+# This is necessary because the application will run as you, not as root.
 version: '2'
 
 services:
     app: #camunda is not an allowed service name. Allowed service names are: api,db,kv,lb,web,app
-        image: jenkins/jenkins:lts
-        restart: always
+        image: debian:latest
         cap_drop:
          - ALL
         cap_add:
@@ -15,10 +14,8 @@ services:
          - FOWNER
          - SETGID
          - SETUID
-#        user: 5951:5242
-        ports:
-         - 60010:8080
-         - 60011:50000
+        stdin_open: true
+        tty: true
         volumes:
          - app.jgi-pps-jenkins:/var/jenkins_home
 volumes:
