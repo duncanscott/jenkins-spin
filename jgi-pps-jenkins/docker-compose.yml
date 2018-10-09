@@ -23,7 +23,10 @@ services:
          - SETUID
         ports:
          - 60010:8080
-#volumes:
-#    app.jgi-pps-jenkins:
-#        driver: rancher-nfs
-#        external: true
+         - 60011:50000
+        volumes:
+         - app.jgi-pps-jenkins:/var/jenkins_home 
+volumes:
+    app.jgi-pps-jenkins:
+        driver: rancher-nfs
+        external: true
