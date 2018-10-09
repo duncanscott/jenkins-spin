@@ -21,6 +21,7 @@ services:
          - FOWNER
          - SETGID
          - SETUID
+        user: 5951:5242
         ports:
          - 60010:8080
          - 60011:50000
