@@ -18,6 +18,8 @@ services:
         tty: true
         volumes:
          - app.jgi-pps-jenkins:/var/jenkins_home
+         - app.jgi-pps-jenkins:/usr/share/jenkins
+         - app.jgi-pps-jenkins:/usr/share/jenkins/ref
 volumes:
     app.jgi-pps-jenkins:
         driver: rancher-nfs
