@@ -6,7 +6,7 @@ version: '2'
 services:
     app: #camunda is not an allowed service name. Allowed service names are: api,db,kv,lb,web,app
         #image: jenkins/jenkins:lts
-        image: jenkins/jenkins:2.138.2
+        image: jenkinsci/blueocean
         restart: always
         cap_drop:
          - ALL
